@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ARRC Rare Disease Triage · v0.4</title>
+<style>
+:root{--bg:#f4f6f7;--card:#fff;--ink:#13212a;--muted:#66747d;--line:#d8e0e4;--accent:#12675e;--accent2:#173f4a;--soft:#e9f4f1;--warn:#8a5a12;--danger:#8b3434}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:#102b2a;color:#fff;padding:18px 28px;display:flex;justify-content:space-between;gap:20px;align-items:center}
+.brand b{font-size:23px;letter-spacing:.06em}.brand span{display:block;font-size:12px;opacity:.82;margin-top:4px}
+.badge{font-size:11px;border:1px solid #62817e;border-radius:999px;padding:7px 10px}
+.wrap{max-width:1500px;margin:auto;padding:20px}.intro{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:16px}
+.intro h1{font-size:22px;margin:0}.intro p{margin:5px 0;color:var(--muted);max-width:900px;line-height:1.45}
+button{border:0;border-radius:8px;padding:10px 13px;font-weight:700;cursor:pointer}.primary{background:var(--accent);color:#fff}.secondary{background:#fff;border:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:1.05fr 1.08fr .9fr;gap:16px}.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 2px 8px #102b2a0a}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.075em;margin:0 0 13px}.sectionlabel{font-size:11px;font-weight:800;color:var(--accent2);margin:15px 0 9px;padding-top:10px;border-top:1px solid var(--line);text-transform:uppercase;letter-spacing:.05em}
+.field{margin-bottom:11px}.field label{font-size:10px;font-weight:800;display:block;margin-bottom:5px;color:#43525b;text-transform:uppercase;letter-spacing:.035em}
+.field input,.field select,.field textarea{width:100%;padding:9px;border:1px solid #cbd5d9;border-radius:7px;background:#fff;font-size:13px;color:var(--ink)}
+.field textarea{min-height:78px;resize:vertical}.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:7px}.check{border:1px solid var(--line);border-radius:8px;padding:8px;background:#fafbfb;font-size:12px}.check input{margin-right:6px}
+.q{padding:10px 0;border-bottom:1px solid var(--line)}.q:last-child{border:0}.q b{font-size:12px;display:block;margin-bottom:7px}.opts{display:flex;gap:5px;flex-wrap:wrap}
+.opts label{font-size:10px;border:1px solid #cbd5d9;padding:6px 8px;border-radius:6px;cursor:pointer}.opts input{margin-right:4px}
+.notice{font-size:11px;padding:9px;border-radius:8px;margin:8px 0;line-height:1.45}.info{background:#eef6f5;border:1px solid #c8ded9;color:#244b47}.warning{background:#fff8e9;border:1px solid #f0dfb8;color:#745019}.danger{background:#fff0f0;border:1px solid #e6c4c4;color:#7d3030}
+.result{background:#102b2a;color:#fff;border-radius:11px;padding:16px;margin-bottom:10px;transition:background .28s ease,box-shadow .28s ease}
+.result.signal-low{background:#237a4b;box-shadow:0 0 0 1px #1b633c inset}
+.result.signal-moderate{background:#b7790b;color:#fff;box-shadow:0 0 0 1px #946108 inset}
+.result.signal-high{background:#c85f16;color:#fff;box-shadow:0 0 0 1px #a64d10 inset}
+.result.signal-very-high{background:#b4232f;color:#fff;box-shadow:0 0 0 1px #8f1c26 inset}
+.result.signal-unclassified{background:#66747d;color:#fff;box-shadow:0 0 0 1px #526069 inset}
+.result.signal-awaiting{background:#102b2a;color:#fff}
+.result .level{font-size:28px;font-weight:850;margin:5px 0}.status{display:inline-block;padding:5px 8px;border-radius:6px;background:#ffffff20;font-size:10px}
+.kv{border-bottom:1px solid var(--line);padding:9px 0}.kv small{color:var(--muted);font-size:9px;text-transform:uppercase}.kv div{font-size:13px;margin-top:3px;font-weight:600;line-height:1.4}
+.flag{font-size:11px;padding:8px;border-left:3px solid var(--accent);background:#f7faf9;margin:6px 0;line-height:1.4}
+.report{margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px}.report h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin:15px 0 7px}.report p,.report li{font-size:12px;line-height:1.5}
+.footer{font-size:10px;color:var(--muted);padding:18px 0 5px;line-height:1.5}.submitrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}.submitmsg{font-size:11px;font-weight:700}.submitmsg.ok{color:#237a4b}.submitmsg.err{color:#8b3434}
+.mustdo{border:2px solid #6840b8;background:#f7f4fc;border-radius:10px;padding:12px;margin:12px 0;box-shadow:0 0 0 3px #6840b812}.mustdo label{color:#3f286f!important}.mustdo .requiredtag{display:inline-block;font-size:9px;font-weight:900;letter-spacing:.08em;background:#6840b8;color:#fff;border-radius:999px;padding:4px 7px;margin-bottom:8px}.postdecision{border-color:#6840b8;background:#f7f4fc;box-shadow:0 0 0 3px #6840b812}.postdecision .requiredtag{background:#6840b8}.submitcritical{border:2px solid #6840b8!important;background:#f7f4fc!important;box-shadow:0 0 0 3px #6840b812}.submitcritical h2{color:#4b2d82}.submitcritical #submitCaseBtn{font-size:14px;padding:13px 18px;background:#6840b8}
+@media(max-width:1050px){.grid{grid-template-columns:1fr}.intro{align-items:flex-start;flex-direction:column}.checks{grid-template-columns:1fr}}
+@media print{header,.intro,.grid,.footer{display:none}.wrap{padding:0}.report{border:0}.report button{display:none}}
+</style>
+</head>
+<body>
+<header><div class="brand"><b>PHENRA</b><span>RARE DISEASE TRIAGE · RESEARCH PROTOTYPE v0.4</span></div><div class="badge">Frontline screening · clinical review required</div></header>
+<main class="wrap"><div class="notice warning"><b>SECURE TEST BUILD — VALIDATION REQUIRED:</b> Only use after server configuration and end-to-end verification. Synthetic cases only.</div>
+<div class="card" style="margin-bottom:12px"><div class="two"><div class="field"><label>Clinician email</label><input id="loginEmail" type="email"></div><div class="field"><label>Password</label><input id="loginPassword" type="password"></div></div><button class="primary" onclick="signIn()">Sign in</button> <span id="authState">Not signed in</span></div><div class="intro"><div><h1>Rare-disease recognition before diagnosis</h1><p>First exclude an adequately explanatory infectious or chronic disease. Then assess whether a distinct unexplained phenotype remains. The result is a qualitative rare-disease signal, not a diagnostic probability.</p></div><div><button class="secondary" onclick="resetAll()">New patient</button> <button class="primary" id="demoBtn" onclick="loadDemo()">Load demo</button></div></div>
+
+<div class="grid">
+<section class="card">
+<h2>1 · Explanatory disease gate</h2>
+<div class="two"><div class="field"><label>Patient ID</label><input id="pid" placeholder="e.g. ARRC-001"></div><div class="field"><label>Age</label><input id="age" type="number" min="0" placeholder="Years"></div></div>
+<div class="two"><div class="field"><label>Sex</label><select id="sex"><option value="">Select</option><option>Female</option><option>Male</option><option>Other / not recorded</option></select></div><div class="field"><label>Clinical setting</label><select id="setting"><option>Outpatient / triage</option><option>Paediatric clinic</option><option>Emergency</option><option>Inpatient</option><option>Specialist clinic</option></select></div></div>
+
+<div class="sectionlabel">Known / confirmed infectious disease</div>
+<div class="checks">
+<label class="check"><input type="checkbox" class="infect" value="HIV">HIV</label>
+<label class="check"><input type="checkbox" class="infect" value="Tuberculosis">Tuberculosis</label>
+<label class="check"><input type="checkbox" class="infect" value="Malaria">Malaria</label>
+<label class="check"><input type="checkbox" class="infect" value="Chronic hepatitis B">Chronic hepatitis B</label>
+<label class="check"><input type="checkbox" class="infect" value="Chronic hepatitis C">Chronic hepatitis C</label>
+<label class="check"><input type="checkbox" class="infect" value="Other confirmed infection">Other confirmed infection</label>
+</div>
+<div class="field" style="margin-top:9px"><label>Other known chronic condition</label><select id="chronic" onchange="gateChanged()"><option value="">None / not established</option><option>Sickle cell disease</option><option>Diabetes mellitus</option><option>Chronic kidney disease</option><option>Established cardiac disease</option><option>Autoimmune / inflammatory disease</option><option>Malignancy</option><option>Other established chronic disease</option></select></div>
+<div id="gateNotice" class="notice info">If a known condition is present, determine whether it explains the complete current phenotype before rare-disease scoring begins.</div>
+<div class="field"><label>Does the known condition adequately explain the complete current phenotype?</label><select id="explains" onchange="gateChanged()"><option value="">Not yet assessed / no known condition</option><option value="yes">Yes — adequately explained</option><option value="partial">Partly — important features remain unexplained</option><option value="no">No — important phenotype remains unexplained</option><option value="uncertain">Uncertain — clinician review needed</option></select></div>
+<div class="field"><label>Independent phenotype despite known disease?</label><select id="independent" onchange="gateChanged()"><option value="">Not assessed</option><option value="yes">Yes — distinct phenotype is present</option><option value="no">No distinct phenotype identified</option><option value="uncertain">Uncertain</option></select></div>
+
+<div class="sectionlabel">Patient phenotype / history of complaints</div>
+<div class="field"><label>Describe the main phenotype in ordinary clinical language</label><textarea id="phenotype" oninput="analysePhenotype()" placeholder="Example: 8-year-old boy, previously ran normally, now progressive difficulty rising from floor; maternal uncle had similar weakness."></textarea></div>
+<div id="phenotypeRead" class="notice info">Enter the dominant clinical phenotype. The box looks for broad clinical pattern terms only; it does not diagnose disease.</div>
+<div class="field"><label>Phenotypic gateway</label><select id="gateway">
+<option value="Unresolved">Unresolved</option><option value="Infectious / acquired">Infectious / acquired</option><option value="Neuromuscular">Neuromuscular</option><option value="Neurodevelopmental">Neurodevelopmental</option><option value="Metabolic">Metabolic</option><option value="Haematological">Haematological</option><option value="Immunological">Immunological</option><option value="Cardiovascular">Cardiovascular</option><option value="Renal">Renal</option><option value="Gastrointestinal">Gastrointestinal</option><option value="Connective tissue">Connective tissue</option><option value="Endocrine">Endocrine</option><option value="Ophthalmological">Ophthalmological</option><option value="Hearing-related">Hearing-related</option><option value="Dermatological">Dermatological</option><option value="Skeletal">Skeletal</option><option value="Hereditary cancer">Hereditary cancer</option><option value="Multisystem / unresolved">Multisystem / unresolved</option>
+</select></div>
+</section>
+
+<section class="card">
+<h2>2 · Rare-disease red flags</h2>
+<div id="questions"></div>
+<div class="two" style="margin-top:12px"><div class="field"><label>Organ systems involved</label><select id="systems"><option value="0">Not established</option><option value="1">One</option><option value="2">Two</option><option value="3">Three</option><option value="4">Four or more</option></select></div><div class="field"><label>Healthcare professionals consulted</label><select id="hcp"><option value="0">0–1</option><option value="1">2</option><option value="2">3–4</option><option value="3">5–7</option><option value="4">8 or more</option></select></div></div>
+<div class="sectionlabel">Pilot metadata — complete before viewing PHENRA output</div>
+<div class="two"><div class="field"><label>Clinician code</label><select id="clinicianCode"><option value="">Select</option><option>C01</option><option>C02</option><option>C03</option><option>C04</option><option>C05</option><option>C06</option><option>C07</option><option>C08</option><option>C09</option><option>C10</option></select></div><div class="field"><label>Case type</label><select id="caseType"><option value="">Select</option><option>Standardized vignette</option></select></div></div>
+<div class="mustdo" id="preDecisionBox"><span class="requiredtag">REQUIRED · BEFORE PHENRA</span><div class="field" style="margin-bottom:0"><label>Before viewing the PHENRA analysis, would you independently escalate this patient for rare-disease/specialist evaluation?</label><select id="clinicianEscalate"><option value="">Select before assessment</option><option value="yes">Yes</option><option value="no">No</option></select></div></div>
+<div class="field"><label>Clinician comment (optional)</label><textarea id="clinicianComments" placeholder="Brief reason for your independent escalation decision. Do not enter names, phone numbers, addresses, hospital numbers or other direct identifiers."></textarea></div>
+<div class="notice warning"><b>Pilot privacy:</b> Use a coded Case ID only. Do not enter patient names, telephone numbers, addresses, exact dates of birth, hospital numbers, national IDs or other direct identifiers.</div>
+<button class="primary" style="width:100%;margin-top:8px" onclick="assess()">Assess rare-disease signal</button>
+<div class="notice warning"><b>Research prototype:</b> Low–Very High categories are provisional research classifications. They are not percentages and are not validated diagnostic probabilities.</div>
+</section>
+
+<section class="card">
+<h2>3 · Triage output</h2>
+<div class="result signal-awaiting" id="signalPanel"><small>RARE-DISEASE SIGNAL</small><div class="level" id="level">Awaiting screen</div><div class="status" id="status">NO CLASSIFICATION</div></div>
+<div class="kv"><small>Explanatory gate</small><div id="gateOut">Not assessed</div></div>
+<div class="kv"><small>Phenotype interpretation</small><div id="phenOut">Not assessed</div></div>
+<div class="kv"><small>Phenotypic gateway</small><div id="gatewayOut">Not assessed</div></div>
+<div class="kv"><small>Clinical discordance</small><div id="discordOut">Not assessed</div></div>
+<div class="kv"><small>Recommended action</small><div id="actionOut">Complete screening.</div></div>
+<div class="mustdo postdecision" id="postDecisionBox"><span class="requiredtag">REQUIRED · AFTER PHENRA</span><div class="field" style="margin-bottom:0"><label>After reviewing the PHENRA analysis, would you now escalate this patient for rare-disease/specialist evaluation?</label><select id="clinicianPostEscalate" disabled><option value="">Complete PHENRA assessment first</option><option value="yes">Yes</option><option value="no">No</option></select></div></div>
+<div class="sectionlabel">Red flags detected</div><div id="flags"><div class="flag">No case processed.</div></div>
+</section>
+</div>
+
+<section class="report" id="report"><b>Referral report</b><p>Process a patient to generate a structured report.</p></section>
+<div class="card submitcritical" style="margin-top:16px"><h2>3 · Pilot data submission · REQUIRED</h2><div class="notice info">Submit only after reviewing the generated report. The pilot database stores the coded assessment record; it is not a patient medical record.</div><div class="submitrow"><button class="primary" id="submitCaseBtn" onclick="submitPilotCase()" disabled>Submit Pilot Case</button><span id="submitMsg" class="submitmsg">Complete an assessment first.</span></div></div>
+<div class="footer">ARRC Rare Disease Triage (PHENRA) is a research prototype for frontline recognition of unexplained phenotypes. It does not diagnose rare disease and does not replace disease-specific clinical assessment. Known infectious or chronic disease must be evaluated for explanatory sufficiency before rare-disease escalation.</div>
+</main>
+<script>
+// DATABASE CONNECTION — replace these two placeholders locally before deployment.
+const SUPABASE_API_URL = 'https://YOUR-NEW-PROJECT.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'YOUR-NEW-PUBLISHABLE-KEY';
+const ENGINE_VERSION = '0.4';
+let lastAssessment = null;
+let lastSubmittedCaseId = null;
+let assessedIdentity = null;
+let accessToken=null, activeCaseId=null, activeAssessmentId=null;
+async function api(body){const r=await fetch(SUPABASE_API_URL.replace(/\/$/,'')+'/functions/v1/phenra-score-v04',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_PUBLISHABLE_KEY,'Authorization':'Bearer '+accessToken},body:JSON.stringify(body)});const d=await r.json();if(!r.ok)throw Error(d.error||'HTTP '+r.status);return d;}
+async function signIn(){try{const r=await fetch(SUPABASE_API_URL.replace(/\/$/,'')+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_PUBLISHABLE_KEY},body:JSON.stringify({email:document.getElementById('loginEmail').value,password:document.getElementById('loginPassword').value})});const d=await r.json();if(!r.ok||!d.access_token)throw Error(d.error_description||'Sign-in failed');accessToken=d.access_token;document.getElementById('authState').textContent='Signed in';document.getElementById('loginPassword').value='';}catch(e){alert(e.message)}}
+
+const Q=[
+{id:'family',domain:'Family pattern',text:'Similar unexplained condition in a biological relative?'},
+{id:'earlydeath',domain:'Family pattern',text:'Unexplained childhood deaths or similarly severe familial illness?'},
+{id:'congenital',domain:'Congenital pattern',text:'Congenital abnormality or unusual physical phenotype?'},
+{id:'development',domain:'Development',text:'Developmental delay, regression or loss of previously acquired ability?'},
+{id:'progressive',domain:'Trajectory',text:'Progressive, degenerative or recurrent unexplained course?'},
+{id:'unusual',domain:'Age / severity',text:'Presentation unusually early, severe or recurrent for the presumed common condition?'},
+{id:'unexplained',domain:'Persistence',text:'Important findings remain unexplained after ordinary clinical evaluation?'},
+{id:'misdx',domain:'Diagnostic journey',text:'Previous diagnosis reversed or repeatedly changed?'},
+{id:'treatfail',domain:'Treatment discordance',text:'Appropriate treatment failed to produce the expected clinical course?'},
+{id:'objective',domain:'Objective abnormality',text:'Persistent unexplained laboratory, imaging, pathology or physiological abnormality?'},
+{id:'commonfail',domain:'Clinical discordance',text:'Does the presumed common diagnosis fail to explain important parts of the phenotype?'},
+{id:'gestalt',domain:'Clinical pattern',text:'Does the overall combination appear clinically unusual or internally discordant?'}
+];
+function renderQ(){document.getElementById('questions').innerHTML=Q.map(q=>`<div class="q"><b>${q.text}</b><div class="opts"><label><input type="radio" name="${q.id}" value="1">YES</label><label><input type="radio" name="${q.id}" value="0">NO</label><label><input type="radio" name="${q.id}" value="u">UNKNOWN</label></div></div>`).join('')}
+function ans(id){const x=document.querySelector(`input[name="${id}"]:checked`);return x?x.value:''}
+function answerText(id){const v=ans(id);return v==='1'?'YES':v==='0'?'NO':'UNKNOWN'}
+function escapeHTML(value){return String(value??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function infections(){return [...document.querySelectorAll('.infect:checked')].map(x=>x.value)}
+document.querySelectorAll('.infect').forEach(x=>x.addEventListener('change',gateChanged));
+
+function gateChanged(){
+ const inf=infections(), chronic=document.getElementById('chronic').value, ex=document.getElementById('explains').value, ind=document.getElementById('independent').value;
+ const n=document.getElementById('gateNotice');
+ if(!inf.length&&!chronic){n.className='notice info';n.innerHTML='No established infectious/chronic condition recorded. Continue phenotype assessment.';return}
+ const names=[...inf,chronic].filter(Boolean).join(', ');
+ if(ex==='yes'&&ind==='no'){n.className='notice warning';n.innerHTML=`<b>${names}</b> is recorded and currently judged to explain the complete phenotype. Rare-disease scoring will stop unless an independent unexplained phenotype is identified.`}
+ else {n.className='notice info';n.innerHTML=`Known condition recorded: <b>${names}</b>. Rare-disease assessment should consider only features that remain independent or inadequately explained.`}
+}
+
+const lex={
+'Infectious / acquired':['hiv','tuberculosis','tb','malaria','hepatitis','infection','infectious','fever','sepsis'],
+'Neuromuscular':['weakness','gowers','walking','walk','running','run','muscle','myopathy','contracture','motor','proximal'],
+'Neurodevelopmental':['developmental','delay','regression','seizure','intellectual','speech','autism','milestone'],
+'Haematological':['anaemia','anemia','jaundice','haemolysis','hemolysis','bleeding','transfusion','cytopenia'],
+'Metabolic':['hypoglycemia','hypoglycaemia','metabolic','acidosis','decompensation','fasting','encephalopathy'],
+'Immunological':['recurrent infection','opportunistic','abscess','immunodeficiency','autoimmune'],
+'Cardiovascular':['cardiomyopathy','arrhythmia','syncope','heart failure','aortic'],
+'Renal':['proteinuria','nephrotic','renal','kidney','haematuria','hematuria'],
+'Gastrointestinal':['abdominal','diarrhea','diarrhoea','vomiting','constipation','dysphagia','malabsorption','gastrointestinal','bowel','hepatomegaly','splenomegaly'],
+'Dermatological':['rash','blister','skin','photosensitivity','ichthyosis'],
+'Skeletal':['fracture','skeletal','bone','short stature','scoliosis'],
+'Hereditary cancer':['cancer','tumour','tumor','multiple primary','early onset cancer']
+};
+function analysePhenotype(){
+ const text=document.getElementById('phenotype').value.toLowerCase(), box=document.getElementById('phenotypeRead');
+ if(text.trim().length<8){box.innerHTML='Enter the dominant clinical phenotype. The box looks for broad clinical pattern terms only; it does not diagnose disease.';return}
+ let scores={};Object.entries(lex).forEach(([g,words])=>scores[g]=words.reduce((n,w)=>n+(text.includes(w)?1:0),0));
+ let ranked=Object.entries(scores).sort((a,b)=>b[1]-a[1]); let top=ranked[0];
+ const independentTerms=['congenital','since birth','developmental','regression','progressive','family','sibling','brother','sister','mother','father','uncle','aunt','lost ability','unexplained'];
+ const independentHits=independentTerms.filter(w=>text.includes(w));
+ if(top&&top[1]>0) document.getElementById('gateway').value=top[0];
+ let msg=top&&top[1]>0?`Dominant pattern detected: <b>${top[0]}</b>. `:'No dominant gateway identified from the text. ';
+ if(independentHits.length)msg+=`Independent-pattern terms noted: ${independentHits.join(', ')}. Review whether these remain unexplained by any known disease.`;
+ else if(top&&top[0]==='Infectious / acquired')msg+='The phenotype appears predominantly infectious/acquired. Confirm explanatory sufficiency before rare-disease scoring.';
+ else msg+='Use clinical review to select the most appropriate gateway.';
+ box.innerHTML=msg;
+}
+
+function setSignalColour(level){
+ const panel=document.getElementById('signalPanel');
+ panel.className='result';
+ if(level==='LOW')panel.classList.add('signal-low');
+ else if(level==='MODERATE')panel.classList.add('signal-moderate');
+ else if(level==='HIGH')panel.classList.add('signal-high');
+ else if(level==='VERY HIGH')panel.classList.add('signal-very-high');
+ else if(level==='NOT CLASSIFIED')panel.classList.add('signal-unclassified');
+ else panel.classList.add('signal-awaiting');
+}
+async function assess(){
+ const clinicianCode=document.getElementById('clinicianCode').value;
+ const caseType=document.getElementById('caseType').value;
+ const pre=document.getElementById('clinicianEscalate').value;
+ if(!clinicianCode||!caseType||!pre){alert('Select clinician code, case type and independent PRE decision.');return}
+ if(caseType!=='Standardized vignette'){alert('This secure test is restricted to synthetic vignettes.');return}
+ if(!accessToken){alert('Sign in first');return}
+ const input={infections:infections(),chronic:document.getElementById('chronic').value,
+   explains:document.getElementById('explains').value,independent:document.getElementById('independent').value,
+   gateway:document.getElementById('gateway').value,systems:Number(document.getElementById('systems').value),
+   hcp:Number(document.getElementById('hcp').value),answers:Object.fromEntries(Q.map(q=>[q.id,ans(q.id)]))};
+ try{
+    const preRecord=await api({action:'pre',vignetteCode:document.getElementById('pid').value.trim(),pre});
+    activeCaseId=preRecord.caseId;
+    document.getElementById('clinicianEscalate').disabled=true;
+    const result=await api({action:'assess',caseId:activeCaseId,input});
+    activeAssessmentId=result.assessmentId;
+   const {level,status,gate,gateway,action,flags,stop,discord}=result;
+   document.getElementById('level').textContent=level;
+   document.getElementById('status').textContent=status;
+   setSignalColour(level);
+   document.getElementById('gateOut').textContent=gate;
+   document.getElementById('phenOut').innerHTML=document.getElementById('phenotypeRead').innerHTML;
+   document.getElementById('gatewayOut').textContent=gateway;
+   document.getElementById('discordOut').textContent=discord;
+   document.getElementById('actionOut').textContent=action;
+   document.getElementById('flags').innerHTML=stop?'<div class="flag"><b>Explanatory gate</b><br>Known disease currently explains the complete phenotype; rare-disease red-flag accumulation was not used.</div>':flags.length?flags.map(f=>`<div class="flag"><b>${escapeHTML(f.domain)}</b><br>${escapeHTML(f.text)}</div>`).join(''):'<div class="flag">No positive rare-disease red flags recorded.</div>';
+   renderReport(level,status,gate,gateway,action,flags,stop);
+   lastAssessment={rawScore:result.rawScore,level,status,gate,gateway,action};
+   assessedIdentity={clinicianCode,caseType,pre,clinicianComments:document.getElementById('clinicianComments').value};
+   document.getElementById('clinicianEscalate').disabled=true;
+   document.getElementById('clinicianPostEscalate').disabled=false;
+   document.getElementById('submitCaseBtn').disabled=true;
+   document.getElementById('submitMsg').textContent='Select POST decision to submit.';
+ }catch(err){alert('Secure assessment unavailable: '+err.message)}
+}
+function renderReport(level,status,gate,gateway,action,flags,stop){
+ const pid=escapeHTML(document.getElementById('pid').value||'Not recorded'),age=escapeHTML(document.getElementById('age').value||'Not recorded'),sex=escapeHTML(document.getElementById('sex').value||'Not recorded'),phen=escapeHTML(document.getElementById('phenotype').value||'Not recorded');
+ document.getElementById('report').innerHTML=`<button class="secondary" style="float:right" onclick="window.print()">Print report</button><h3>ARRC Rare Disease Triage Report</h3><p><b>Patient:</b> ${pid} &nbsp; <b>Age:</b> ${age} &nbsp; <b>Sex:</b> ${sex}</p><h3>Phenotype</h3><p>${phen}</p><h3>Explanatory gate</h3><p>${gate}</p><h3>Rare-disease signal</h3><p><b>${level}</b><br>${status}</p><h3>Phenotypic gateway</h3><p>${gateway}</p><h3>Red flags</h3>${stop?'<p>Rare-disease scoring stopped because the recorded condition currently explains the phenotype.</p>':flags.length?'<ul>'+flags.map(f=>`<li>${f.text}</li>`).join('')+'</ul>':'<p>No positive red flags recorded.</p>'}<h3>Recommended action</h3><p>${action}</p><p><b>SCREENING SUPPORT — NOT A DIAGNOSIS.</b> Low–Very High are provisional qualitative research categories, not probabilities.</p>`;
+}
+document.getElementById('clinicianPostEscalate').addEventListener('change',function(){if(lastAssessment&&this.value) {document.getElementById('submitCaseBtn').disabled=false;document.getElementById('submitMsg').textContent='Ready to submit POST decision.';}});
+
+async function submitPilotCase(){
+ alert('Submission is disabled in this migration scaffold until authenticated server-side PRE/POST storage, RLS, and schema verification are implemented. Do not use this scaffold for pilot data collection.');
+}
+
+function resetAll(){
+ document.querySelectorAll('input').forEach(x=>{if(x.type==='checkbox'||x.type==='radio')x.checked=false;else x.value=''});
+ document.querySelectorAll('select').forEach(x=>x.selectedIndex=0);
+ document.getElementById('phenotype').value='';
+ document.getElementById('level').textContent='Awaiting screen';document.getElementById('status').textContent='NO CLASSIFICATION';setSignalColour('Awaiting screen');
+ document.getElementById('gateOut').textContent='Not assessed';document.getElementById('phenOut').textContent='Not assessed';document.getElementById('gatewayOut').textContent='Not assessed';document.getElementById('discordOut').textContent='Not assessed';document.getElementById('actionOut').textContent='Complete screening.';
+ document.getElementById('flags').innerHTML='<div class="flag">No case processed.</div>';document.getElementById('report').innerHTML='<b>Referral report</b><p>Process a patient to generate a structured report.</p>';
+ lastAssessment = null;
+  document.getElementById('clinicianEscalate').disabled=false;
+  document.getElementById('clinicianPostEscalate').disabled=true;
+  lastSubmittedCaseId = null;
+  document.getElementById('submitCaseBtn').disabled = true;
+  document.getElementById('submitMsg').className = 'submitmsg';
+  document.getElementById('submitMsg').textContent = 'Complete an assessment first.';
+  analysePhenotype();gateChanged();
+}
+function setRadio(id,val){const x=document.querySelector(`input[name="${id}"][value="${val}"]`);if(x)x.checked=true}
+function loadDemo(){
+ resetAll();
+ document.getElementById('pid').value='DEMO-001';document.getElementById('age').value='8';document.getElementById('sex').value='Male';
+ document.getElementById('phenotype').value='Previously ran normally. Progressive difficulty walking and rising from the floor with loss of motor ability. Maternal uncle reportedly had similar weakness.';
+ document.getElementById('systems').value='2';document.getElementById('hcp').value='3';
+ ['family','development','progressive','unusual','unexplained','misdx','treatfail','objective','commonfail','gestalt'].forEach(id=>setRadio(id,'1'));
+ ['earlydeath','congenital'].forEach(id=>setRadio(id,'0'));
+ analysePhenotype();gateChanged();
+ document.getElementById('demoBtn').textContent='Demo loaded ✓';setTimeout(()=>document.getElementById('demoBtn').textContent='Load demo',1200);
+}
+renderQ();resetAll();
+</script>
+</body></html>
