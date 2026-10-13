@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ARRC Rare Disease Triage · v0.4</title>
+<title>PHENRA · Clinical Classification v0.4</title>
 <style>
 :root{--bg:#f4f6f7;--card:#fff;--ink:#13212a;--muted:#66747d;--line:#d8e0e4;--accent:#12675e;--accent2:#173f4a;--soft:#e9f4f1;--warn:#8a5a12;--danger:#8b3434}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -37,18 +37,82 @@ button{border:0;border-radius:8px;padding:10px 13px;font-weight:700;cursor:point
 .mustdo{border:2px solid #6840b8;background:#f7f4fc;border-radius:10px;padding:12px;margin:12px 0;box-shadow:0 0 0 3px #6840b812}.mustdo label{color:#3f286f!important}.mustdo .requiredtag{display:inline-block;font-size:9px;font-weight:900;letter-spacing:.08em;background:#6840b8;color:#fff;border-radius:999px;padding:4px 7px;margin-bottom:8px}.postdecision{border-color:#6840b8;background:#f7f4fc;box-shadow:0 0 0 3px #6840b812}.postdecision .requiredtag{background:#6840b8}.submitcritical{border:2px solid #6840b8!important;background:#f7f4fc!important;box-shadow:0 0 0 3px #6840b812}.submitcritical h2{color:#4b2d82}.submitcritical #submitCaseBtn{font-size:14px;padding:13px 18px;background:#6840b8}
 @media(max-width:1050px){.grid{grid-template-columns:1fr}.intro{align-items:flex-start;flex-direction:column}.checks{grid-template-columns:1fr}}
 @media print{header,.intro,.grid,.footer{display:none}.wrap{padding:0}.report{border:0}.report button{display:none}}
+/* Login is a simple front layer; the assessment remains unchanged behind it. */
+#loginLayer{position:fixed;inset:0;z-index:1000;background:#f4f6f7;display:flex;align-items:center;justify-content:center;padding:20px}
+#loginLayer.is-hidden{display:none}
+.login-card{width:min(410px,100%);background:#fff;border:1px solid var(--line);border-radius:12px;padding:28px;box-shadow:0 8px 32px #102b2a14}
+.login-card h1{font-size:25px;color:#102b2a;margin:0 0 5px}
+.login-card p{font-size:13px;color:var(--muted);line-height:1.5;margin:0 0 22px}
+.login-card .primary{width:100%;margin-top:5px}
+#signedInBar{display:none;font-size:12px;color:var(--muted);margin-bottom:12px;text-align:right}
+
+/* Quiet clinical emphasis: only the decisive unexplained-findings question. */
+#independentField{padding:11px 12px 12px;border:1px solid #b7d0cc;border-left:3px solid var(--accent);border-radius:8px;background:#f5faf9;transition:border-color .2s,background .2s}
+#independentField label{font-size:11px;color:#173f4a;line-height:1.5}
+#independentField select{border-color:#9dbdb6}
+#independentField:focus-within{border-color:#12675e;box-shadow:0 0 0 2px #12675e12}
+#independentField.gate-attention{animation:gate-attention 1.15s ease-in-out 2}
+@keyframes gate-attention{50%{border-color:#b26c34;box-shadow:0 0 0 3px #b26c341b}}
+@media(prefers-reduced-motion:reduce){#independentField.gate-attention{animation:none}}
+#gateConflict{display:none;margin:8px 0 11px;padding:9px 11px;border:1px solid #dfc4a9;border-radius:7px;background:#fff9f2;color:#714e2d;font-size:11px;line-height:1.5}
+#gateConflict.visible{display:block}
+
+/* Final clinical presentation layer — PHENRA scoring and server contract unchanged. */
+:root{--accent:#087e99;--accent2:#164c64;--soft:#eaf8fc;--line:#dce7ec;--bg:#f3f7f9}
+body{font-family:Inter,"Segoe UI",Arial,sans-serif;line-height:1.5}
+header{background:#112f3b;padding:20px clamp(16px,3vw,38px);box-shadow:0 3px 18px #0c2c3820}
+.brand b{font-size:27px;letter-spacing:.075em;font-weight:800}
+.brand span{font-size:12px;letter-spacing:.018em;opacity:.94}
+.brand .version{display:inline-block;margin-left:6px;padding:1px 6px;border:1px solid #8aabb7;border-radius:4px;font-size:10px}
+.auth-pill{display:flex;align-items:center;gap:8px;border:1px solid #68858d;border-radius:99px;padding:8px 13px;color:#dbeaf0;font-size:12px;white-space:nowrap}
+.auth-dot{height:7px;width:7px;border-radius:50%;background:#8ca3ac}.auth-pill.authenticated .auth-dot{background:#47d1b1;box-shadow:0 0 0 3px #47d1b122}
+.wrap{max-width:1650px;padding:22px clamp(12px,2vw,28px)}
+#signedInBar{display:none!important}
+.intro{margin-bottom:15px}.intro h1{font-size:21px;letter-spacing:-.025em}.intro p{font-size:13px}
+.grid{grid-template-columns:minmax(0,1.18fr) minmax(0,1.02fr) minmax(0,.87fr);gap:17px}
+.card,.report,.case-tracker{border-radius:12px;box-shadow:0 3px 14px #153d490a}
+.card{padding:19px}.card h2{font-size:12px;letter-spacing:.075em;color:#204c5b}
+.field label{font-size:11px;letter-spacing:.02em}.field input,.field select,.field textarea{font-size:14px;min-height:39px;border-color:#c8d9e0}
+.field textarea{line-height:1.65}.opts label{font-size:11px}.q b{font-size:13px;line-height:1.5}
+button.primary{background:#087e99;transition:background .2s,transform .2s}button.primary:hover:not(:disabled){background:#08667e}button:disabled{opacity:.57;cursor:not-allowed}
+#casePreviewWrap{margin-top:15px;margin-bottom:18px}
+#casePreviewWrap>label{font-size:12px;color:#125a72;margin-bottom:9px}
+#casePreview{font-size:15px;line-height:1.78;letter-spacing:.004em;background:#f5fbfe;color:#203b48;border:1.5px solid #42b7d2;border-left:5px solid #0796b8;border-radius:10px;padding:17px 18px;max-height:410px;overflow:auto;box-shadow:0 0 0 3px #42b7d20e;scrollbar-color:#8acbd9 #eff7fa}
+.mustdo,.postdecision{border:2px solid #16a6c8;background:#eefaff;box-shadow:0 0 0 3px #12a2c80d}
+.mustdo label{color:#145b71!important}.mustdo .requiredtag,.postdecision .requiredtag{background:#087f9c}
+.submitcritical{border:2px solid #16a6c8!important;background:#f4fcff!important;box-shadow:0 0 0 3px #12a2c80d}
+.submitcritical h2{color:#145b71}.submitcritical #submitCaseBtn{background:#087f9c}
+.mustdo.step-focus,.submitcritical.step-focus,#runAssessmentBtn.step-focus,#submitCaseBtn.step-focus{animation:cyan-pulse 1.05s ease-in-out 2}
+@keyframes cyan-pulse{50%{box-shadow:0 0 0 7px #12b9dc24;border-color:#078eac}}
+.privacy-note{font-size:11px;color:#617780;margin:12px 0;line-height:1.5}
+.footer{border-top:1px solid #dce7ec;margin-top:22px;padding-top:16px;font-size:11px}
+.case-tracker{background:#fff;border:1px solid #dce7ec;padding:14px 17px;margin-bottom:18px}
+.tracker-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:11px}
+.tracker-head>div{display:flex;align-items:baseline;gap:13px;flex-wrap:wrap}.tracker-head strong{font-size:12px;color:#173f4d}.tracker-head span{font-size:11px;color:#6a7f89}
+.tracker-key{display:flex;align-items:center;gap:5px}.tracker-key i{height:8px;width:8px;border-radius:2px;display:inline-block;margin-left:8px}.key-done{background:#168a68}.key-warn{background:#e5a73a}
+.tracker-grid{display:grid;grid-template-columns:repeat(20,minmax(0,1fr));gap:6px}
+.case-tile{border:1px solid #d2e1e7;background:#f4f8fa;color:#486471;border-radius:6px;min-height:32px;padding:5px 0;font-size:10px;font-weight:700;text-align:center;cursor:pointer}
+.case-tile.done{background:#137a4c;border-color:#075d36;color:#ffffff;box-shadow:0 1px 4px #075d3633}.case-tile.done:hover{background:#0c663e}.case-tile.done.selected{outline:2px solid #064a2e;outline-offset:2px}.case-tile.attention{background:#fff2dc;border-color:#e5b45c;color:#98600c}.case-tile.active{background:#e4f7fd;border-color:#33a8c6;color:#076783}.case-tile.selected{outline:2px solid #087f9c;outline-offset:1px}
+.tracker-note{font-size:10px;color:#738891;margin-top:8px}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}.tracker-grid{grid-template-columns:repeat(10,minmax(0,1fr))}#casePreview{max-height:50vh}}
+@media(max-width:620px){header{padding:15px 14px;gap:8px}.brand b{font-size:23px}.brand span{font-size:10px}.auth-pill{padding:6px 9px;font-size:10px}.wrap{padding:12px}.card{padding:14px}.tracker-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.case-tile{min-height:35px;font-size:11px}#casePreview{font-size:15px;line-height:1.85;max-height:55vh;padding:14px}.intro{gap:10px}.intro h1{font-size:19px}}
+@media(prefers-reduced-motion:reduce){.mustdo.step-focus,.submitcritical.step-focus,#runAssessmentBtn.step-focus,#submitCaseBtn.step-focus{animation:none}*{scroll-behavior:auto!important}}
+@media print{.case-tracker{display:none}}
 </style>
 </head>
 <body>
-<header><div class="brand"><b>PHENRA</b><span>RARE DISEASE TRIAGE · RESEARCH PROTOTYPE v0.4</span></div><div class="badge">Frontline screening · clinical review required</div></header>
-<main class="wrap"><div class="notice warning"><b>SECURE TEST BUILD — VALIDATION REQUIRED:</b> Only use after server configuration and end-to-end verification. Synthetic cases only.</div>
-<div class="card" style="margin-bottom:12px"><div class="two"><div class="field"><label>Clinician email</label><input id="loginEmail" type="email"></div><div class="field"><label>Password</label><input id="loginPassword" type="password"></div></div><button class="primary" onclick="signIn()">Sign in</button> <span id="authState">Not signed in</span></div><div class="intro"><div><h1>Rare-disease recognition before diagnosis</h1><p>First exclude an adequately explanatory infectious or chronic disease. Then assess whether a distinct unexplained phenotype remains. The result is a qualitative rare-disease signal, not a diagnostic probability.</p></div><div><button class="secondary" onclick="resetAll()">New patient</button> <button class="primary" id="demoBtn" onclick="loadDemo()">Load demo</button></div></div>
+<div id="loginLayer"><div class="login-card"><h1>PHENRA</h1><p>Secure clinician sign-in · Research prototype v0.4<br>Synthetic vignettes only</p><div class="field"><label>Clinician email</label><input id="loginEmail" type="email" autocomplete="username"></div><div class="field"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password"></div><button class="primary" onclick="signIn()">Sign in</button></div></div>
+<header><div class="brand"><b>PHENRA</b><span>PHENotype-based Rare Disease Classification <span class="version">v0.4</span></span></div><div id="headerAuth" class="auth-pill"><span class="auth-dot"></span><span id="headerAuthText">Secure clinical assessment</span></div></header>
+<main class="wrap">
+<div id="signedInBar" aria-live="polite"><span id="authState">Not signed in</span></div><div class="intro"><div><h1>Clinical assessment</h1><p>Review the case, record your independent decision, then compare it with PHENRA’s classification.</p></div><div><button class="secondary" onclick="resetAll()">New vignette</button></div></div><section class="case-tracker" aria-label="Case progress"><div class="tracker-head"><div><strong>Case progress</strong><span id="caseProgressCount">0 of 20 completed</span></div><span class="tracker-key"><i class="key-done"></i> Submitted <i class="key-warn"></i> Needs attention</span></div><div id="caseTrackerGrid" class="tracker-grid"></div></section>
 
 <div class="grid">
 <section class="card">
-<h2>1 · Explanatory disease gate</h2>
-<div class="two"><div class="field"><label>Patient ID</label><input id="pid" placeholder="e.g. ARRC-001"></div><div class="field"><label>Age</label><input id="age" type="number" min="0" placeholder="Years"></div></div>
-<div class="two"><div class="field"><label>Sex</label><select id="sex"><option value="">Select</option><option>Female</option><option>Male</option><option>Other / not recorded</option></select></div><div class="field"><label>Clinical setting</label><select id="setting"><option>Outpatient / triage</option><option>Paediatric clinic</option><option>Emergency</option><option>Inpatient</option><option>Specialist clinic</option></select></div></div>
+<h2>1 · Clinical history and known conditions</h2>
+<div class="field"><label>Case ID <span style="color:#8b3434">*</span></label><select id="vignetteCode" onchange="selectVignette()" required><option value="">Select case</option><option value="CASE1">CASE1</option><option value="CASE2">CASE2</option><option value="CASE3">CASE3</option><option value="CASE4">CASE4</option><option value="CASE5">CASE5</option><option value="CASE6">CASE6</option><option value="CASE7">CASE7</option><option value="CASE8">CASE8</option><option value="CASE9">CASE9</option><option value="CASE10">CASE10</option><option value="CASE11">CASE11</option><option value="CASE12">CASE12</option><option value="CASE13">CASE13</option><option value="CASE14">CASE14</option><option value="CASE15">CASE15</option><option value="CASE16">CASE16</option><option value="CASE17">CASE17</option><option value="CASE18">CASE18</option><option value="CASE19">CASE19</option><option value="CASE20">CASE20</option></select></div>
+<div class="field" id="casePreviewWrap" style="display:none"><label>Clinical vignette · read before recording your decision</label><div id="casePreview" class="notice info" style="white-space:pre-line"></div></div>
+<div class="two"><div class="field"><label>Age</label><input id="age" type="number" min="0" placeholder="Years"></div><div class="field"><label>Sex</label><select id="sex"><option value="">Select</option><option>Female</option><option>Male</option><option>Other / not recorded</option></select></div></div>
+<div class="field"><label>Clinical setting</label><select id="setting"><option>Outpatient / triage</option><option>Paediatric clinic</option><option>Emergency</option><option>Inpatient</option><option>Specialist clinic</option></select></div>
 
 <div class="sectionlabel">Known / confirmed infectious disease</div>
 <div class="checks">
@@ -60,9 +124,10 @@ button{border:0;border-radius:8px;padding:10px 13px;font-weight:700;cursor:point
 <label class="check"><input type="checkbox" class="infect" value="Other confirmed infection">Other confirmed infection</label>
 </div>
 <div class="field" style="margin-top:9px"><label>Other known chronic condition</label><select id="chronic" onchange="gateChanged()"><option value="">None / not established</option><option>Sickle cell disease</option><option>Diabetes mellitus</option><option>Chronic kidney disease</option><option>Established cardiac disease</option><option>Autoimmune / inflammatory disease</option><option>Malignancy</option><option>Other established chronic disease</option></select></div>
-<div id="gateNotice" class="notice info">If a known condition is present, determine whether it explains the complete current phenotype before rare-disease scoring begins.</div>
-<div class="field"><label>Does the known condition adequately explain the complete current phenotype?</label><select id="explains" onchange="gateChanged()"><option value="">Not yet assessed / no known condition</option><option value="yes">Yes — adequately explained</option><option value="partial">Partly — important features remain unexplained</option><option value="no">No — important phenotype remains unexplained</option><option value="uncertain">Uncertain — clinician review needed</option></select></div>
-<div class="field"><label>Independent phenotype despite known disease?</label><select id="independent" onchange="gateChanged()"><option value="">Not assessed</option><option value="yes">Yes — distinct phenotype is present</option><option value="no">No distinct phenotype identified</option><option value="uncertain">Uncertain</option></select></div>
+<div id="gateNotice" class="notice info">If a known condition is present, assess whether it explains the clinical findings.</div>
+<div class="field"><label>Does the known condition explain the patient’s current findings?</label><select id="explains" onchange="gateChanged()"><option value="">Not assessed / no known condition</option><option value="yes">Yes — adequately explained</option><option value="partial">Partly — some findings remain unexplained</option><option value="no">No — findings remain unexplained</option><option value="uncertain">Uncertain</option></select></div>
+<div class="field" id="independentField"><label>Are there important findings not explained by the known condition?</label><select id="independent" onchange="gateChanged()"><option value="">Not assessed</option><option value="yes">Yes — unexplained findings remain</option><option value="no">No — all findings are explained</option><option value="uncertain">Uncertain</option></select></div>
+<div id="gateConflict" role="alert" aria-live="polite">These answers do not agree. Review whether the known condition fully explains the findings or whether important findings remain unexplained.</div>
 
 <div class="sectionlabel">Patient phenotype / history of complaints</div>
 <div class="field"><label>Describe the main phenotype in ordinary clinical language</label><textarea id="phenotype" oninput="analysePhenotype()" placeholder="Example: 8-year-old boy, previously ran normally, now progressive difficulty rising from floor; maternal uncle had similar weakness."></textarea></div>
@@ -77,12 +142,12 @@ button{border:0;border-radius:8px;padding:10px 13px;font-weight:700;cursor:point
 <div id="questions"></div>
 <div class="two" style="margin-top:12px"><div class="field"><label>Organ systems involved</label><select id="systems"><option value="0">Not established</option><option value="1">One</option><option value="2">Two</option><option value="3">Three</option><option value="4">Four or more</option></select></div><div class="field"><label>Healthcare professionals consulted</label><select id="hcp"><option value="0">0–1</option><option value="1">2</option><option value="2">3–4</option><option value="3">5–7</option><option value="4">8 or more</option></select></div></div>
 <div class="sectionlabel">Pilot metadata — complete before viewing PHENRA output</div>
-<div class="two"><div class="field"><label>Clinician code</label><select id="clinicianCode"><option value="">Select</option><option>C01</option><option>C02</option><option>C03</option><option>C04</option><option>C05</option><option>C06</option><option>C07</option><option>C08</option><option>C09</option><option>C10</option></select></div><div class="field"><label>Case type</label><select id="caseType"><option value="">Select</option><option>Standardized vignette</option></select></div></div>
+<div class="two"><div class="field"><label>Clinician ID (automatic)</label><input id="clinicianCode" value="Sign in to identify clinician" readonly aria-readonly="true"></div><div class="field"><label>Case type</label><select id="caseType"><option value="">Select</option><option>Standardized vignette</option></select></div></div>
 <div class="mustdo" id="preDecisionBox"><span class="requiredtag">REQUIRED · BEFORE PHENRA</span><div class="field" style="margin-bottom:0"><label>Before viewing the PHENRA analysis, would you independently escalate this patient for rare-disease/specialist evaluation?</label><select id="clinicianEscalate"><option value="">Select before assessment</option><option value="yes">Yes</option><option value="no">No</option></select></div></div>
 <div class="field"><label>Clinician comment (optional)</label><textarea id="clinicianComments" placeholder="Brief reason for your independent escalation decision. Do not enter names, phone numbers, addresses, hospital numbers or other direct identifiers."></textarea></div>
-<div class="notice warning"><b>Pilot privacy:</b> Use a coded Case ID only. Do not enter patient names, telephone numbers, addresses, exact dates of birth, hospital numbers, national IDs or other direct identifiers.</div>
-<button class="primary" style="width:100%;margin-top:8px" onclick="assess()">Assess rare-disease signal</button>
-<div class="notice warning"><b>Research prototype:</b> Low–Very High categories are provisional research classifications. They are not percentages and are not validated diagnostic probabilities.</div>
+<div class="privacy-note">Use assigned synthetic cases only. Do not enter identifiable patient information.</div>
+<button class="primary" style="width:100%;margin-top:8px" id="runAssessmentBtn" onclick="assess()">Run PHENRA assessment</button>
+
 </section>
 
 <section class="card">
@@ -100,19 +165,40 @@ button{border:0;border-radius:8px;padding:10px 13px;font-weight:700;cursor:point
 
 <section class="report" id="report"><b>Referral report</b><p>Process a patient to generate a structured report.</p></section>
 <div class="card submitcritical" style="margin-top:16px"><h2>3 · Pilot data submission · REQUIRED</h2><div class="notice info">Submit only after reviewing the generated report. The pilot database stores the coded assessment record; it is not a patient medical record.</div><div class="submitrow"><button class="primary" id="submitCaseBtn" onclick="submitPilotCase()" disabled>Submit Pilot Case</button><span id="submitMsg" class="submitmsg">Complete an assessment first.</span></div></div>
-<div class="footer">ARRC Rare Disease Triage (PHENRA) is a research prototype for frontline recognition of unexplained phenotypes. It does not diagnose rare disease and does not replace disease-specific clinical assessment. Known infectious or chronic disease must be evaluated for explanatory sufficiency before rare-disease escalation.</div>
+<div class="footer">PHENRA v0.4 · Standardized clinical vignette assessment. Classification supports escalation decisions; it is not a diagnosis or diagnostic probability. For research use only.</div>
 </main>
 <script>
 // DATABASE CONNECTION — replace these two placeholders locally before deployment.
-const SUPABASE_API_URL = 'https://bqwuwhvolithosjloafb.supabase.co/rest/v1/';
+const SUPABASE_API_URL = 'https://bqwuwhvolithosjloafb.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Xh5ZImatNm1OkB_3sJRDSQ_I8cU8HW3';
 const ENGINE_VERSION = '0.4';
+const APPROVED_CASE_TEXT = {"CASE1": "A 2½-year-old boy is brought because of recurrent febrile illnesses, poor appetite and poor weight gain over the preceding two months. He weighs 10 kg. He was reportedly well at birth but developed severe neonatal jaundice requiring nursery admission. His mother does not know the diagnosis made at that time.\n\nHe has been treated several times for presumed malaria without sustained improvement. Recent malaria testing, HIV testing and typhoid testing are negative. Examination shows mild pallor but no obvious congenital abnormalities. His mother initially reports no significant family history. During further questioning, she recalls that an older son also developed jaundice in childhood and was investigated for sickle cell disease, but testing reportedly did not support sickle cell disease.\n\nNo definitive explanation for the recurrent jaundice/anaemia tendency has been established.\n\nHe has consulted three different clinicians for this illness. A recent full blood count confirms anaemia, but haemoglobin fractionation and red-cell enzyme testing have not been performed. No transfusion has been given. There is no confirmed chronic infection or established diagnosis that explains the neonatal jaundice and present anaemia. His developmental milestones are appropriate for age. No other organ-system abnormality has been identified.", "CASE2": "An 8-year-old boy is brought because his teachers report that he is becoming increasingly slow during physical activities. His mother says he has “never been very athletic,” but he attends school normally and has no known intellectual disability.\n\nDuring the past two years, he has increasingly avoided football and struggles to keep pace with classmates. He occasionally falls while running but does not complain of pain. His mother initially reports no family history of muscle disease.\n\nExamination shows normal sensation, no obvious joint swelling and no focal neurological deficit. He rises from the floor somewhat slowly but can do so without assistance.\n\nWhile blood is being drawn for routine investigations, an uncle arrives and reports that three male relatives on the mother's side became unable to walk during adolescence; two currently use wheelchairs. The family has never received a molecular diagnosis.\n\nHe has consulted four different clinicians. He has received no specific treatment for muscle disease. Creatine kinase has not been measured. Early developmental milestones were normal. No cardiac, respiratory or sensory symptoms are reported. The difficulty with physical activity has steadily progressed, and no acquired explanation has been established.", "CASE3": "A 17-year-old girl has had recurrent wheeze, nocturnal cough and episodic breathlessness since childhood. Symptoms worsen with dust, cold weather and exercise. Her mother has asthma and a younger sibling has eczema.\n\nShe has attended emergency services twice during the past year after running out of inhalers. Between episodes she is generally well. Chest radiography is unremarkable. Spirometry demonstrates reversible airflow obstruction. Symptoms improve substantially when she consistently uses prescribed inhaled corticosteroid therapy.\n\nThere is no developmental abnormality, unusual infection pattern, multisystem involvement or unexplained progressive deterioration.\n\nShe has consulted three different clinicians. She has no persistent symptoms between attacks, no unusual infections and no additional organ-system findings. The diagnosis of asthma has not been changed. The documented airway reversibility and improvement with regular inhaled treatment adequately explain the respiratory presentation.", "CASE4": "A 26-year-old man presents after two episodes of exertional presyncope. For approximately one year he has experienced intermittent palpitations. He does not smoke and has no known hypertension or diabetes.\n\nECG demonstrates abnormalities prompting echocardiography, which shows marked left ventricular wall thickening that is not readily explained by loading conditions. He reports that his father died suddenly at age 39 while walking to work. A paternal uncle reportedly died unexpectedly in his early forties.\n\nThe patient has previously been told that anxiety might explain his palpitations.\n\nHe has consulted three different clinicians. No specific cardiac treatment has yet been started. He had normal childhood development and has no known chronic infection or other systemic illness. The echocardiographic abnormality remains unexplained by hypertension, valvular disease or another recognised loading condition. No cardiac MRI or genetic investigation has been performed.", "CASE5": "A 5-year-old boy has experienced repeated respiratory infections since infancy. During the past two years he has had three radiologically documented episodes of pneumonia and several episodes of otitis. Growth has fallen from approximately the middle of the growth chart in infancy to below the expected range for age.\n\nHe has required several courses of antibiotics, with improvement during individual infections followed by recurrence. HIV testing is negative. There is no known congenital heart disease.\n\nHis parents report that an older male sibling died at age 3 following repeated severe infections, but no diagnosis was established.\n\nHe has consulted five different clinicians for these recurrent illnesses. A full blood count has been obtained, but immunoglobulin levels and lymphocyte subsets have not been tested. There is no long-term immunosuppressive treatment or established chronic lung disease. Development has otherwise been age appropriate. No single diagnosis explains the recurrent serious infections and faltering growth.", "CASE6": "A 29-year-old woman presents with fatigue three weeks after laboratory-confirmed malaria. She completed treatment and has had no further fever. Repeat malaria testing is negative.\n\nCBC shows mild anaemia. She reports heavy menstrual bleeding for several months. Examination is otherwise unremarkable. There is no childhood history of anaemia, unusual infections, neurological disease, unexplained organ involvement or significant family history.\n\nHer clinician starts investigation and treatment for iron deficiency and abnormal uterine bleeding.\n\nShe has consulted two different clinicians for this illness. Iron studies are pending, and the response to treatment for menstrual blood loss has not yet been assessed. There is no known chronic illness, persistent fever, organ enlargement or abnormality outside the haematological and gynaecological findings. No previous diagnosis has been withdrawn or repeatedly changed.", "CASE7": "A 4-year-old girl is brought because she has not developed meaningful speech and remains unsteady when walking. Pregnancy and delivery were reportedly uncomplicated. She sat later than expected and walked independently after age 2.\n\nHer parents describe frequent smiling and episodes of apparently inappropriate laughter. She has marked sleep difficulty and recently developed episodes concerning for seizures. Examination demonstrates gait instability but no obvious acquired focal neurological deficit.\n\nThere has been no developmental regression after a period of normal development. Two older siblings are developmentally typical.\n\nShe has consulted three different clinicians. Hearing loss has not been established. No EEG, brain imaging or genetic testing has yet been performed. There is no history of chronic infection, acquired brain injury or loss of previously acquired skills. Her difficulties have been present from early development. No treatment has yet been directed at an established underlying cause.", "CASE8": "A 52-year-old man presents for follow-up of type 2 diabetes diagnosed five years earlier. At diagnosis his BMI was 31 kg/m². His father and two brothers also developed diabetes in their forties or fifties.\n\nHis glycaemic control worsened during a period of medication non-adherence and improved after treatment was restarted and diet modified. Renal function is normal, and there are no unusual neurological, developmental, sensory or multisystem findings.\n\nHe has consulted one clinician for his diabetes care. There is no unexplained hypoglycaemia, hearing impairment, pancreatic disease, renal dysfunction or other organ-system abnormality. His diagnosis has remained unchanged, and treatment is effective when taken as prescribed.", "CASE9": "A 23-year-old woman reports four years of episodic swelling involving the hands, feet and occasionally the face. Individual attacks develop over several hours and resolve over two to four days.\n\nThe swelling is generally not itchy and is not accompanied by urticaria. Antihistamines have provided little benefit. She recalls two episodes of severe abdominal pain with vomiting for which imaging reportedly showed bowel-wall oedema but no surgical cause.\n\nHer father had similar recurrent swelling and died unexpectedly following severe throat swelling in his forties.\n\nBetween attacks, examination is normal.\n\nShe has consulted four different clinicians for these episodes. She has no known chronic kidney, liver or cardiac disease and does not take an ACE inhibitor. Routine investigations between attacks have not established a cause, and complement studies have not been performed. The swelling and abdominal episodes have continued despite antihistamine treatment.", "CASE10": "A 46-year-old man who works as a driver reports chronic lower-back pain radiating into his left leg. Symptoms worsen after prolonged sitting and improve when he changes position. There is intermittent numbness along the lateral foot.\n\nMRI demonstrates lumbar disc disease with nerve-root compression corresponding reasonably to the distribution of his symptoms. Neurological examination shows no unexplained multisystem abnormality. There is no significant family history, childhood neurological disorder or progressive involvement outside the affected distribution.\n\nHe has consulted two different clinicians for these symptoms. There is no bowel or bladder dysfunction, progressive weakness or sensory change outside the affected leg. No additional organ-system abnormality has been found. The imaging and clinical findings provide a satisfactory explanation for his symptoms; there has been no unexpected failure of appropriate treatment.", "CASE11": "A 19-year-old man is referred after persistent microscopic haematuria is found during repeated evaluations. Renal function is mildly impaired for age, and urine testing shows persistent proteinuria.\n\nHe also has bilateral sensorineural hearing impairment first recognized during adolescence. There is no history of recurrent urinary infection or known nephrotoxic exposure.\n\nHis mother reports that two maternal male relatives developed kidney failure before age 40; one also had significant hearing impairment.\n\nHe has consulted three different clinicians. The haematuria and proteinuria have persisted on repeated samples over several months. No renal biopsy or molecular testing has been performed. There is no diabetes, chronic infection or established acquired condition explaining both the renal and hearing findings. His childhood development was normal.", "CASE12": "A 34-year-old woman develops two generalized seizures following a severe febrile illness. Neuroimaging identifies a cerebral lesion compatible with neurocysticercosis, and the clinical team considers this sufficient to explain the seizures.\n\nShe has normal childhood development, no prior seizure history, no unusual dermatological findings, no progressive neurological symptoms and no relevant family history.\n\nShe responds to appropriate neurological management and remains clinically stable during follow-up.\n\nShe has consulted two different clinicians for this illness. There have been no further seizures during documented follow-up and no unexplained findings in other organ systems. The cerebral lesion and clinical course are considered sufficient to explain the presentation. No prior diagnosis has been repeatedly changed.", "CASE13": "A 7-year-old girl has poor linear growth and low weight despite repeated nutritional interventions. Her parents report that her appetite is reasonable. She has chronic intermittent abdominal distension and loose stools.\n\nOver the previous two years she has received nutritional supplementation several times with only transient improvement. She also has persistent iron-deficiency anaemia despite reported adherence to oral iron.\n\nThere is no known developmental regression. One paternal aunt reportedly has longstanding gastrointestinal problems, but details are unavailable.\n\nRoutine infection screening has not provided a persistent explanation.\n\nShe has consulted five different clinicians over the past two years. Stool examination and routine infection screening have not established a cause. Coeliac serology and other specialist investigations have not been undertaken. There is no known chronic infection, congenital anomaly or developmental disorder. Nutritional supplementation and oral iron have not produced sustained improvement in growth or anaemia. The gastrointestinal, growth and haematological findings remain without a unifying diagnosis.", "CASE14": "A 61-year-old woman with obesity, long-standing hypertension and chronic kidney disease attends follow-up because her blood pressure remains elevated. Medication review shows that she frequently misses doses because of cost and sometimes goes several days without treatment.\n\nHer blood pressure improves substantially during periods of documented adherence. There is no unusually early onset, syndromic phenotype, unexplained electrolyte disturbance, developmental history or family pattern of premature catastrophic disease.\n\nShe has consulted two different clinicians for her hypertension and kidney disease. Hypertension began in middle age. There is no childhood history of severe hypertension, unexplained neurological or skeletal finding, or unusual familial pattern. Blood pressure improves with consistent treatment, and the established diagnoses and interruptions in medication adequately explain the present course.", "CASE15": "A 21-year-old man reports recurrent severe muscle pain after unusually strenuous exercise. On three occasions he noticed dark-coloured urine several hours after prolonged physical exertion. Between episodes he feels normal and has normal strength.\n\nOne episode followed a long-distance run while fasting. Another occurred after intensive football training. During an acute episode, creatine kinase was markedly elevated. Renal function subsequently returned to baseline.\n\nHe denies recreational drug use. A younger brother reportedly experienced a similar episode after prolonged exercise but was never investigated.\n\nHe has consulted three different clinicians for these episodes. He takes no statin or other known myotoxic medicine. Between attacks there is no persistent weakness, sensory loss or renal impairment. Development was normal. The markedly raised creatine kinase during attacks is documented, but no inherited or metabolic cause has been established and no specific preventive treatment has been tried.", "CASE16": "A 6-year-old boy presents with constipation, tiredness and slowing linear growth. His school performance has declined somewhat during the past year. Examination shows dry skin and slowed reflexes.\n\nThyroid testing demonstrates markedly elevated TSH with reduced free T4. Thyroid autoantibodies are positive. There is no unusual congenital phenotype, unexplained neurological disorder or additional organ involvement.\n\nAppropriate thyroid replacement has recently been initiated.\n\nHe has consulted two different clinicians. There is no hearing impairment, seizure history, congenital abnormality or unexplained organ-system finding. Thyroid replacement was started recently, so its longer-term effect has not yet been assessed. The laboratory findings provide a coherent explanation for the growth, bowel and general symptoms.", "CASE17": "A 14-year-old boy has progressive deterioration in school performance and increasing difficulty seeing in dim light. His parents report that he previously performed normally at school.\n\nOver approximately three years he has developed gait instability and intermittent involuntary movements. Ophthalmological assessment confirms retinal degeneration. Routine brain imaging does not provide a unifying acquired explanation.\n\nHis parents are clinically unaffected. They originate from the same small community and report that a distant relative developed similar neurological problems during adolescence.\n\nHe has consulted three different clinicians. There is no known toxin exposure, chronic infection or acquired neurological diagnosis. No metabolic or molecular investigations have been completed. Visual loss, motor abnormalities and deterioration in school performance have continued to progress. He had no reported developmental difficulties before this decline.", "CASE18": "A 10-year-old girl has experienced stereotyped episodes of fever approximately every four to six weeks for two years. Episodes last three to four days and are accompanied by severe abdominal pain and joint pain. She is generally well between episodes.\n\nRepeated malaria tests and bacterial cultures during several attacks have been negative. Antibiotics have not altered the pattern. Inflammatory markers are substantially elevated during attacks and return toward normal between episodes.\n\nHer father recalls experiencing recurrent unexplained febrile episodes during adolescence, although these became less frequent in adulthood.\n\nShe has consulted four different clinicians for these recurrent episodes. There is no chronic infection, immunosuppressive treatment or ongoing illness between episodes. Antibiotic courses have not altered the recurring fever pattern. No acquired condition has been established that explains the episodic inflammation and associated abdominal and joint symptoms.", "CASE19": "A 38-year-old man with chronic hepatitis B presents with persistent burning pain in both feet and intermittent numbness extending upward toward the lower legs. His liver enzymes are currently within reference range and there is no evidence that he is acutely unwell from hepatitis.\n\nOver the preceding year he has also developed exercise intolerance and occasional light-headedness. Several clinic measurements show resting bradycardia. Routine diabetes screening is normal.\n\nHe has previously been treated for lumbar pain, but the sensory symptoms have become bilateral and progressive and no single established diagnosis satisfactorily explains the neurological and cardiovascular findings.\n\nA maternal uncle reportedly developed unexplained heart disease and progressive walking difficulty in later adulthood.\n\nHe has consulted three different clinicians for his current health concerns. He has no known diabetes or advanced liver disease. Nerve-conduction studies and echocardiography have not yet been performed. The contribution of hepatitis B to the neuropathic symptoms remains uncertain; the progressive sensory changes and repeated bradycardia have not been adequately explained. No specific treatment for these findings has yet been evaluated.", "CASE20": "A 31-year-old woman presents with recurrent palpitations, tingling around the mouth and fingers, chest tightness and a sensation of inability to take a full breath. Episodes occur during periods of marked emotional stress, peak within approximately 10 minutes and resolve spontaneously.\n\nShe has attended emergency services several times. ECG, full blood count, electrolytes, glucose, thyroid testing and cardiopulmonary examination have been reassuring. During a witnessed episode she is tachypnoeic but oxygen saturation remains normal. Symptoms improve as breathing slows.\n\nShe has no syncope, progressive neurological deficit, childhood abnormalities, unexplained objective organ dysfunction or relevant family history.\n\nShe has consulted three different clinicians for these episodes. She is well between episodes, with no persistent objective abnormality or progressive symptom. There is no established chronic infection, cardiac disease or neurological condition. Her working diagnosis has not been repeatedly revised. Symptoms improve during observed episodes with reassurance and slower breathing."};
+const CASE_INPUTS_DRAFT = {"CASE1": {"infections": [], "chronic": "", "explains": "", "independent": "", "gateway": "Haematological", "systems": 1, "hcp": 2, "answers": {"family": "1", "earlydeath": "u", "congenital": "0", "development": "0", "progressive": "1", "unusual": "1", "unexplained": "1", "misdx": "0", "treatfail": "1", "objective": "1", "commonfail": "1", "gestalt": "1"}}, "CASE2": {"infections": [], "chronic": "", "explains": "", "independent": "", "gateway": "Neuromuscular", "systems": 1, "hcp": 2, "answers": {"family": "1", "earlydeath": "0", "congenital": "0", "development": "0", "progressive": "1", "unusual": "1", "unexplained": "1", "misdx": "0", "treatfail": "0", "objective": "u", "commonfail": "1", "gestalt": "1"}}, "CASE3": {"infections": [], "chronic": "Other established chronic disease", "explains": "yes", "independent": "no", "gateway": "Infectious / acquired", "systems": 1, "hcp": 2, "answers": {"family": "0", "earlydeath": "0", "congenital": "0", "development": "0", "progressive": "0", "unusual": "0", "unexplained": "0", "misdx": "0", "treatfail": "0", "objective": "0", "commonfail": "0", "gestalt": "0"}}, "CASE4": {"infections": [], "chronic": "", "explains": "", "independent": "", "gateway": "Cardiovascular", "systems": 1, "hcp": 2, "answers": {"family": "1", "earlydeath": "1", "congenital": "0", "development": "0", "progressive": "0", "unusual": "1", "unexplained": "1", "misdx": "u", "treatfail": "0", "objective": "1", "commonfail": "1", "gestalt": "1"}}, "CASE5": {"infections": [], "chronic": "", "explains": "", "independent": "", "gateway": "Immunological", "systems": 2, "hcp": 3, "answers": {"family": "1", "earlydeath": "1", "congenital": "0", "development": "0", "progressive": "1", "unusual": "1", "unexplained": "1", "misdx": "0", "treatfail": "1", "objective": "1", "commonfail": "1", "gestalt": "1"}}, "CASE6": {"infections": [], "chronic": "", "explains": "", "independent": "", "gateway": "Haematological", "systems": 2, "hcp": 1, "answers": {"family": "0", "earlydeath": "0", "congenital": "0", "development": "0", "progressive": "0", "unusual": "0", "unexplained": "0", "misdx": "0", "treatfail": "u", "objective": "0", "commonfail": "0", "gestalt": "0"}}, "CASE7": {"infections": [], "chronic": "", "explains": "", "independent": "", "gateway": "Neurodevelopmental", "systems": 2, "hcp": 2, "answers": {"family": "0", "earlydeath": "0", "congenital": "0", "development": "1", "progressive": "0", "unusual": "1", "unexplained": "1", "misdx": "0", "treatfail": "0", "objective": "0", "commonfail": "0", "gestalt": "1"}}, "CASE8": {"infections": [], "chronic": "Diabetes mellitus", "explains": "yes", "independent": "no", "gateway": "Endocrine", "systems": 1, "hcp": 0, "answers": {"family": "0", "earlydeath": "0", "congenital": "0", "development": "0", "progressive": "0", "unusual": "0", "unexplained": "0", "misdx": "0", "treatfail": "0", "objective": "0", "commonfail": "0", "gestalt": "0"}}, "CASE9": {"infections": [], "chronic": "", "explains": "", "independent": "", "gateway": "Multisystem / unresolved", "systems": 2, "hcp": 2, "answers": {"family": "1", "earlydeath": "u", "congenital": "0", "development": "0", "progressive": "1", "unusual": "1", "unexplained": "1", "misdx": "0", "treatfail": "1", "objective": "1", "commonfail": "1", "gestalt": "1"}}, "CASE10": {"infections": [], "chronic": "Other established chronic disease", "explains": "yes", "independent": "no", "gateway": "Neuromuscular", "systems": 1, "hcp": 1, "answers": {"family": "0", "earlydeath": "0", "congenital": "0", "development": "0", "progressive": "0", "unusual": "0", "unexplained": "0", "misdx": "0", "treatfail": "0", "objective": "0", "commonfail": "0", "gestalt": "0"}}, "CASE11": {"infections": [], "chronic": "", "explains": "", "independent": "", "gateway": "Multisystem / unresolved", "systems": 2, "hcp": 2, "answers": {"family": "1", "earlydeath": "0", "congenital": "0", "development": "0", "progressive": "1", "unusual": "1", "unexplained": "1", "misdx": "0", "treatfail": "0", "objective": "1", "commonfail": "1", "gestalt": "1"}}, "CASE12": {"infections": [], "chronic": "Other established chronic disease", "explains": "yes", "independent": "no", "gateway": "Infectious / acquired", "systems": 1, "hcp": 1, "answers": {"family": "0", "earlydeath": "0", "congenital": "0", "development": "0", "progressive": "0", "unusual": "0", "unexplained": "0", "misdx": "0", "treatfail": "0", "objective": "0", "commonfail": "0", "gestalt": "0"}}, "CASE13": {"infections": [], "chronic": "", "explains": "", "independent": "", "gateway": "Gastrointestinal", "systems": 3, "hcp": 3, "answers": {"family": "u", "earlydeath": "0", "congenital": "0", "development": "0", "progressive": "1", "unusual": "1", "unexplained": "1", "misdx": "0", "treatfail": "1", "objective": "1", "commonfail": "1", "gestalt": "1"}}, "CASE14": {"infections": [], "chronic": "Chronic kidney disease", "explains": "yes", "independent": "no", "gateway": "Cardiovascular", "systems": 2, "hcp": 1, "answers": {"family": "0", "earlydeath": "0", "congenital": "0", "development": "0", "progressive": "0", "unusual": "0", "unexplained": "0", "misdx": "0", "treatfail": "0", "objective": "0", "commonfail": "0", "gestalt": "0"}}, "CASE15": {"infections": [], "chronic": "", "explains": "", "independent": "", "gateway": "Metabolic", "systems": 2, "hcp": 2, "answers": {"family": "1", "earlydeath": "0", "congenital": "0", "development": "0", "progressive": "1", "unusual": "1", "unexplained": "1", "misdx": "0", "treatfail": "0", "objective": "1", "commonfail": "1", "gestalt": "1"}}, "CASE16": {"infections": [], "chronic": "Other established chronic disease", "explains": "yes", "independent": "no", "gateway": "Endocrine", "systems": 2, "hcp": 1, "answers": {"family": "0", "earlydeath": "0", "congenital": "0", "development": "0", "progressive": "0", "unusual": "0", "unexplained": "0", "misdx": "0", "treatfail": "0", "objective": "0", "commonfail": "0", "gestalt": "0"}}, "CASE17": {"infections": [], "chronic": "", "explains": "", "independent": "", "gateway": "Multisystem / unresolved", "systems": 3, "hcp": 2, "answers": {"family": "1", "earlydeath": "0", "congenital": "0", "development": "1", "progressive": "1", "unusual": "1", "unexplained": "1", "misdx": "0", "treatfail": "0", "objective": "1", "commonfail": "1", "gestalt": "1"}}, "CASE18": {"infections": [], "chronic": "", "explains": "", "independent": "", "gateway": "Multisystem / unresolved", "systems": 3, "hcp": 2, "answers": {"family": "1", "earlydeath": "0", "congenital": "0", "development": "0", "progressive": "1", "unusual": "1", "unexplained": "1", "misdx": "0", "treatfail": "1", "objective": "1", "commonfail": "1", "gestalt": "1"}}, "CASE19": {"infections": ["Chronic hepatitis B"], "chronic": "", "explains": "partial", "independent": "yes", "gateway": "Multisystem / unresolved", "systems": 2, "hcp": 2, "answers": {"family": "1", "earlydeath": "0", "congenital": "0", "development": "0", "progressive": "1", "unusual": "1", "unexplained": "1", "misdx": "0", "treatfail": "0", "objective": "1", "commonfail": "1", "gestalt": "1"}}, "CASE20": {"infections": [], "chronic": "", "explains": "", "independent": "", "gateway": "Cardiovascular", "systems": 1, "hcp": 2, "answers": {"family": "0", "earlydeath": "0", "congenital": "0", "development": "0", "progressive": "0", "unusual": "0", "unexplained": "0", "misdx": "0", "treatfail": "0", "objective": "0", "commonfail": "0", "gestalt": "0"}}};
 let lastAssessment = null;
 let lastSubmittedCaseId = null;
 let assessedIdentity = null;
-let accessToken=null, activeCaseId=null, activeAssessmentId=null;
+let accessToken=null, activeCaseId=null, activeAssessmentId=null, authenticatedClinicianId=null;
+let assignedClinicianCode=null, serverCaseProgress={}, progressVerified=false, progressMessage="Sign in to load saved case progress.";
 async function api(body){const r=await fetch(SUPABASE_API_URL.replace(/\/$/,'')+'/functions/v1/phenra-score-v04',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_PUBLISHABLE_KEY,'Authorization':'Bearer '+accessToken},body:JSON.stringify(body)});const d=await r.json();if(!r.ok)throw Error(d.error||'HTTP '+r.status);return d;}
-async function signIn(){try{const r=await fetch(SUPABASE_API_URL.replace(/\/$/,'')+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_PUBLISHABLE_KEY},body:JSON.stringify({email:document.getElementById('loginEmail').value,password:document.getElementById('loginPassword').value})});const d=await r.json();if(!r.ok||!d.access_token)throw Error(d.error_description||'Sign-in failed');accessToken=d.access_token;document.getElementById('authState').textContent='Signed in';document.getElementById('loginPassword').value='';}catch(e){alert(e.message)}}
+async function signIn(){
+ try{
+  const r=await fetch(SUPABASE_API_URL.replace(/\/$/,'')+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_PUBLISHABLE_KEY},body:JSON.stringify({email:document.getElementById('loginEmail').value,password:document.getElementById('loginPassword').value})});
+  const d=await r.json();if(!r.ok||!d.access_token)throw Error(d.error_description||'Sign-in failed');
+  accessToken=d.access_token;
+  const u=await fetch(SUPABASE_API_URL.replace(/\/$/,'')+'/auth/v1/user',{headers:{'apikey':SUPABASE_PUBLISHABLE_KEY,'Authorization':'Bearer '+accessToken}});
+  const user=await u.json();if(!u.ok||!user.id){accessToken=null;throw Error('Unable to verify signed-in clinician')}
+  authenticatedClinicianId=user.id;
+  assignedClinicianCode=null;serverCaseProgress={};progressVerified=false;
+  document.getElementById('clinicianCode').value='Loading clinician number…';
+  document.getElementById('authState').textContent='Signed in';
+  document.getElementById('headerAuthText').textContent='Clinician signed in';
+  document.getElementById('headerAuth').classList.add('authenticated');
+  document.getElementById('loginPassword').value='';
+  document.getElementById('loginLayer').classList.add('is-hidden');
+  document.getElementById('signedInBar').style.display='block';
+  await loadClinicianProgress();
+ }catch(e){alert(e.message)}
+}
 
 const Q=[
 {id:'family',domain:'Family pattern',text:'Similar unexplained condition in a biological relative?'},
@@ -135,6 +221,19 @@ function escapeHTML(value){return String(value??'').replace(/[&<>'"]/g,c=>({'&':
 function infections(){return [...document.querySelectorAll('.infect:checked')].map(x=>x.value)}
 document.querySelectorAll('.infect').forEach(x=>x.addEventListener('change',gateChanged));
 
+function gateIsContradictory(){
+ const known=infections().length>0||!!document.getElementById('chronic').value;
+ if(!known)return false;
+ const ex=document.getElementById('explains').value,ind=document.getElementById('independent').value;
+ return (ex==='yes'&&ind==='yes')||((ex==='partial'||ex==='no')&&ind==='no');
+}
+function updateGateConflict(){
+ const conflict=gateIsContradictory();
+ const box=document.getElementById('gateConflict');
+ box.classList.toggle('visible',conflict);
+ document.getElementById('independent').setAttribute('aria-invalid',String(conflict));
+ return conflict;
+}
 function gateChanged(){
  const inf=infections(), chronic=document.getElementById('chronic').value, ex=document.getElementById('explains').value, ind=document.getElementById('independent').value;
  const n=document.getElementById('gateNotice');
@@ -183,20 +282,54 @@ function setSignalColour(level){
  else if(level==='NOT CLASSIFIED')panel.classList.add('signal-unclassified');
  else panel.classList.add('signal-awaiting');
 }
+function fillCaseInputs(code){
+ const input=CASE_INPUTS_DRAFT[code];
+ if(!input)throw Error('No scoring mapping for '+code);
+ document.querySelectorAll('.infect').forEach(el=>{el.checked=input.infections.includes(el.value)});
+ for(const id of ['chronic','explains','independent','gateway','systems','hcp'])document.getElementById(id).value=String(input[id]??'');
+ for(const q of Q){document.querySelectorAll('input[name="'+q.id+'"]').forEach(el=>{el.checked=el.value===input.answers[q.id]})}
+ gateChanged();updateGateConflict();
+}
+function lockScoringInputs(locked){
+ document.querySelectorAll('.infect,#chronic,#explains,#independent,#gateway,#systems,#hcp,#questions input').forEach(el=>el.disabled=locked);
+}
+function selectVignette(){
+  if(activeCaseId){alert('Finish the current case before selecting another.');document.getElementById('vignetteCode').value=activeVignetteCode||'';return;}
+  const code=document.getElementById('vignetteCode').value;
+  if(progressVerified && getCaseProgress()[code]==='done'){alert(code+' is already completed for '+assignedClinicianCode+'.');document.getElementById('vignetteCode').value='';refreshCaseTracker();return;}
+  const text=APPROVED_CASE_TEXT[code]||'';
+  document.getElementById('casePreviewWrap').style.display=text?'block':'none';
+  document.getElementById('casePreview').textContent=text;
+  document.getElementById('phenotype').value=text;
+  const age=text.match(/^An? (\d+)(?:½)?-year-old (boy|girl|man|woman)/i);
+  document.getElementById('age').value=age?age[1]:'';
+  document.getElementById('sex').value=age?(/boy|man/i.test(age[2])?'Male':'Female'):'';
+  document.getElementById('caseType').value=code?'Standardized vignette':'';
+  analysePhenotype();
+  lockScoringInputs(true);
+}
+let activeVignetteCode=null;
 async function assess(){
- const clinicianCode=document.getElementById('clinicianCode').value;
+  if(activeCaseId){alert('This case has already been started. Do not rescore; finish the POST decision or start a new vignette.');return}
+ const clinicianCode=authenticatedClinicianId;
  const caseType=document.getElementById('caseType').value;
  const pre=document.getElementById('clinicianEscalate').value;
- if(!clinicianCode||!caseType||!pre){alert('Select clinician code, case type and independent PRE decision.');return}
+ if(!clinicianCode||!caseType||!pre){alert('Sign in, select case type and record your independent PRE decision.');return}
  if(caseType!=='Standardized vignette'){alert('This secure test is restricted to synthetic vignettes.');return}
  if(!accessToken){alert('Sign in first');return}
- const input={infections:infections(),chronic:document.getElementById('chronic').value,
-   explains:document.getElementById('explains').value,independent:document.getElementById('independent').value,
-   gateway:document.getElementById('gateway').value,systems:Number(document.getElementById('systems').value),
-   hcp:Number(document.getElementById('hcp').value),answers:Object.fromEntries(Q.map(q=>[q.id,ans(q.id)]))};
+
+ const vignetteCode=document.getElementById('vignetteCode').value.trim().toUpperCase();
+ if(!APPROVED_CASE_TEXT[vignetteCode]){alert('Select CASE1 through CASE20.');document.getElementById('vignetteCode').focus();return}
+ if(progressVerified && getCaseProgress()[vignetteCode]==='done'){alert(vignetteCode+' is already completed for '+assignedClinicianCode);return}
+ if(!CASE_INPUTS_DRAFT[vignetteCode]){alert('Case mapping unavailable.');return}
+ const input=CASE_INPUTS_DRAFT[vignetteCode];
  try{
-    const preRecord=await api({action:'pre',vignetteCode:document.getElementById('pid').value.trim(),pre});
+    markCaseProgress(vignetteCode,'active');
+   const preRecord=await api({action:'pre',vignetteCode,pre});
     activeCaseId=preRecord.caseId;
+    fillCaseInputs(vignetteCode);
+    activeVignetteCode=vignetteCode;
+    document.getElementById('vignetteCode').disabled=true;
     document.getElementById('clinicianEscalate').disabled=true;
     const result=await api({action:'assess',caseId:activeCaseId,input});
     activeAssessmentId=result.assessmentId;
@@ -217,45 +350,128 @@ async function assess(){
    document.getElementById('clinicianPostEscalate').disabled=false;
    document.getElementById('submitCaseBtn').disabled=true;
    document.getElementById('submitMsg').textContent='Select POST decision to submit.';
+   advanceTo('postDecisionBox');
  }catch(err){alert('Secure assessment unavailable: '+err.message)}
 }
 function renderReport(level,status,gate,gateway,action,flags,stop){
- const pid=escapeHTML(document.getElementById('pid').value||'Not recorded'),age=escapeHTML(document.getElementById('age').value||'Not recorded'),sex=escapeHTML(document.getElementById('sex').value||'Not recorded'),phen=escapeHTML(document.getElementById('phenotype').value||'Not recorded');
- document.getElementById('report').innerHTML=`<button class="secondary" style="float:right" onclick="window.print()">Print report</button><h3>ARRC Rare Disease Triage Report</h3><p><b>Patient:</b> ${pid} &nbsp; <b>Age:</b> ${age} &nbsp; <b>Sex:</b> ${sex}</p><h3>Phenotype</h3><p>${phen}</p><h3>Explanatory gate</h3><p>${gate}</p><h3>Rare-disease signal</h3><p><b>${level}</b><br>${status}</p><h3>Phenotypic gateway</h3><p>${gateway}</p><h3>Red flags</h3>${stop?'<p>Rare-disease scoring stopped because the recorded condition currently explains the phenotype.</p>':flags.length?'<ul>'+flags.map(f=>`<li>${f.text}</li>`).join('')+'</ul>':'<p>No positive red flags recorded.</p>'}<h3>Recommended action</h3><p>${action}</p><p><b>SCREENING SUPPORT — NOT A DIAGNOSIS.</b> Low–Very High are provisional qualitative research categories, not probabilities.</p>`;
+ const caseId=escapeHTML(document.getElementById('vignetteCode').value||'Not recorded'),age=escapeHTML(document.getElementById('age').value||'Not recorded'),sex=escapeHTML(document.getElementById('sex').value||'Not recorded'),phen=escapeHTML(document.getElementById('phenotype').value||'Not recorded');
+ document.getElementById('report').innerHTML=`<button class="secondary" style="float:right" onclick="window.print()">Print report</button><h3>PHENRA Clinical Assessment Report</h3><p><b>Case ID:</b> ${caseId} &nbsp; <b>Age:</b> ${age} &nbsp; <b>Sex:</b> ${sex}</p><h3>Phenotype</h3><p>${phen}</p><h3>Explanatory gate</h3><p>${gate}</p><h3>Rare-disease signal</h3><p><b>${level}</b><br>${status}</p><h3>Phenotypic gateway</h3><p>${gateway}</p><h3>Red flags</h3>${stop?'<p>Rare-disease scoring stopped because the recorded condition currently explains the phenotype.</p>':flags.length?'<ul>'+flags.map(f=>`<li>${f.text}</li>`).join('')+'</ul>':'<p>No positive red flags recorded.</p>'}<h3>Recommended action</h3><p>${action}</p><p><b>SCREENING SUPPORT — NOT A DIAGNOSIS.</b> Low–Very High are provisional qualitative research categories, not probabilities.</p>`;
 }
 document.getElementById('clinicianPostEscalate').addEventListener('change',function(){if(lastAssessment&&this.value) {document.getElementById('submitCaseBtn').disabled=false;document.getElementById('submitMsg').textContent='Ready to submit POST decision.';}});
 
 async function submitPilotCase(){
- alert('Submission is disabled in this migration scaffold until authenticated server-side PRE/POST storage, RLS, and schema verification are implemented. Do not use this scaffold for pilot data collection.');
+ const post=document.getElementById('clinicianPostEscalate').value;
+ if(!activeAssessmentId||!post){alert('Complete assessment and select POST decision.');return}
+ const btn=document.getElementById('submitCaseBtn');btn.disabled=true;
+ try{
+  await api({action:'post',assessmentId:activeAssessmentId,post});
+  document.getElementById('clinicianPostEscalate').disabled=true;
+  document.getElementById('submitMsg').textContent='POST decision saved.';
+  document.getElementById('submitMsg').className='submitmsg ok';
+  markCaseProgress(document.getElementById('vignetteCode').value,'done');
+  advanceTo('submitMsg');
+ }catch(e){markCaseProgress(document.getElementById('vignetteCode').value,'attention');btn.disabled=false;document.getElementById('submitMsg').textContent='Submission failed: '+e.message;document.getElementById('submitMsg').className='submitmsg err'}
 }
 
 function resetAll(){
- document.querySelectorAll('input').forEach(x=>{if(x.type==='checkbox'||x.type==='radio')x.checked=false;else x.value=''});
+ document.querySelectorAll('main input').forEach(x=>{if(x.type==='checkbox'||x.type==='radio')x.checked=false;else x.value=''});
  document.querySelectorAll('select').forEach(x=>x.selectedIndex=0);
  document.getElementById('phenotype').value='';
  document.getElementById('level').textContent='Awaiting screen';document.getElementById('status').textContent='NO CLASSIFICATION';setSignalColour('Awaiting screen');
  document.getElementById('gateOut').textContent='Not assessed';document.getElementById('phenOut').textContent='Not assessed';document.getElementById('gatewayOut').textContent='Not assessed';document.getElementById('discordOut').textContent='Not assessed';document.getElementById('actionOut').textContent='Complete screening.';
  document.getElementById('flags').innerHTML='<div class="flag">No case processed.</div>';document.getElementById('report').innerHTML='<b>Referral report</b><p>Process a patient to generate a structured report.</p>';
- lastAssessment = null;
+ lastAssessment = null; activeCaseId=null;activeAssessmentId=null;activeVignetteCode=null;
+  document.querySelectorAll('main input,main select,main textarea').forEach(el=>{if(!['clinicianPostEscalate'].includes(el.id))el.disabled=false});document.getElementById('clinicianCode').value=assignedClinicianCode||'Clinician number unavailable';
   document.getElementById('clinicianEscalate').disabled=false;
   document.getElementById('clinicianPostEscalate').disabled=true;
   lastSubmittedCaseId = null;
   document.getElementById('submitCaseBtn').disabled = true;
   document.getElementById('submitMsg').className = 'submitmsg';
   document.getElementById('submitMsg').textContent = 'Complete an assessment first.';
-  analysePhenotype();gateChanged();
+  analysePhenotype();gateChanged();lockScoringInputs(true);
 }
 function setRadio(id,val){const x=document.querySelector(`input[name="${id}"][value="${val}"]`);if(x)x.checked=true}
 function loadDemo(){
  resetAll();
- document.getElementById('pid').value='DEMO-001';document.getElementById('age').value='8';document.getElementById('sex').value='Male';
+ document.getElementById('vignetteCode').value='CASE2';selectVignette();
  document.getElementById('phenotype').value='Previously ran normally. Progressive difficulty walking and rising from the floor with loss of motor ability. Maternal uncle reportedly had similar weakness.';
  document.getElementById('systems').value='2';document.getElementById('hcp').value='3';
  ['family','development','progressive','unusual','unexplained','misdx','treatfail','objective','commonfail','gestalt'].forEach(id=>setRadio(id,'1'));
  ['earlydeath','congenital'].forEach(id=>setRadio(id,'0'));
  analysePhenotype();gateChanged();
- document.getElementById('demoBtn').textContent='Demo loaded ✓';setTimeout(()=>document.getElementById('demoBtn').textContent='Load demo',1200);
+ document.getElementById('demoBtn').textContent='Example loaded ✓';setTimeout(()=>document.getElementById('demoBtn').textContent='Load example',1200);
 }
+
+// Clinician identity and case status are authoritative only when returned by the
+// authenticated Edge Function. No locally inferred completion is shown as saved.
+function progressKey(){return 'phenra-ui-draft-v04-'+(authenticatedClinicianId||'anonymous')}
+function getCaseProgress(){return serverCaseProgress}
+async function loadClinicianProgress(){
+ progressVerified=false;serverCaseProgress={};assignedClinicianCode=null;
+ progressMessage='Checking saved case progress…';refreshCaseTracker();
+ try{
+  // Server contract: {clinicianCode:'CLN01', completedCases:['CASE3'],
+  // pendingCases:['CASE7']}. Server MUST derive user identity from JWT,
+  // assign persistent CLN01–CLN10, and scope results to that user.
+  const result=await api({action:'progress'});
+  if(!/^CLN(?:0[1-9]|10)$/.test(result.clinicianCode||''))throw Error('Valid clinician number not returned');
+  if(!Array.isArray(result.completedCases)||!Array.isArray(result.pendingCases||[]))throw Error('Case progress not returned');
+  assignedClinicianCode=result.clinicianCode;
+  const statuses={};
+  for(const code of result.pendingCases||[]){if(/^CASE(?:[1-9]|1[0-9]|20)$/.test(code))statuses[code]='attention'}
+  for(const code of result.completedCases){if(/^CASE(?:[1-9]|1[0-9]|20)$/.test(code))statuses[code]='done'}
+  serverCaseProgress=statuses;progressVerified=true;progressMessage='Saved progress synchronized with Supabase.';
+  document.getElementById('headerAuthText').textContent=assignedClinicianCode+' logged in';
+  document.getElementById('clinicianCode').value=assignedClinicianCode;
+ }catch(e){
+  progressMessage='Saved progress unavailable. Ask the administrator to enable secure clinician progress. '+e.message;
+  document.getElementById('headerAuthText').textContent='Signed in · progress unavailable';
+  document.getElementById('clinicianCode').value='Not assigned by server';
+ }
+ refreshCaseTracker();
+}
+function markCaseProgress(code,status){
+ // Update only after successful POST; immediately recheck authoritative records.
+ if(status==='done')loadClinicianProgress();
+ else if(status==='attention'){progressMessage='Submission needs attention; saved progress will be checked on reload.';refreshCaseTracker()}
+}
+function refreshCaseTracker(){
+ const grid=document.getElementById('caseTrackerGrid');if(!grid)return;
+ const p=getCaseProgress();
+ grid.innerHTML=Array.from({length:20},(_,i)=>{
+  const c='CASE'+(i+1),state=p[c]||'',selected=document.getElementById('vignetteCode')?.value===c;
+  const title=state==='done'?'Completed and saved for this clinician':state==='attention'?'Started; check outstanding POST':'Not marked completed';
+  return `<button type="button" class="case-tile ${state} ${selected?'selected':''}" title="${c}: ${title}" aria-label="${c}: ${title}" onclick="chooseCaseFromTracker('${c}')">${i+1}${state==='done'?' ✓':''}</button>`
+ }).join('');
+ const count=Object.values(p).filter(x=>x==='done').length;
+ document.getElementById('caseProgressCount').textContent=progressVerified?count+' of 20 completed':'Progress not verified';
+ 
+}
+function chooseCaseFromTracker(code){
+ const sel=document.getElementById('vignetteCode');
+ if(activeCaseId){alert('Finish the current case before switching.');return}
+ if(getCaseProgress()[code]==='done'){alert(code+' is already complete for '+(assignedClinicianCode||'this clinician')+'. Select an unfinished case.');return}
+ sel.value=code;selectVignette();
+ document.getElementById('casePreviewWrap').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+}
+// Visual workflow guidance only; PHENRA scoring and submission logic are unchanged.
+function guideNextStep(id){
+ const el=document.getElementById(id);if(!el)return;
+ const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ el.scrollIntoView({behavior:reduced?'auto':'smooth',block:'center'});
+ el.classList.remove('step-focus');void el.offsetWidth;el.classList.add('step-focus');
+}
+document.getElementById('clinicianEscalate').addEventListener('change',function(){
+ if(this.value && !activeCaseId) guideNextStep('runAssessmentBtn');
+});
+document.getElementById('clinicianPostEscalate').addEventListener('change',function(){
+ if(this.value && activeAssessmentId) guideNextStep('submitCaseBtn');
+});
+
+function advanceTo(id){const el=document.getElementById(id);if(!el)return;setTimeout(()=>{el.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});el.classList.remove('step-focus');void el.offsetWidth;el.classList.add('step-focus')},100)}
+const oldSelectVignette=selectVignette;selectVignette=function(){oldSelectVignette();refreshCaseTracker()};
+refreshCaseTracker();
+
 renderQ();resetAll();
 </script>
 </body></html>
